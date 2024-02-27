@@ -3,14 +3,33 @@
 * Architecture: https://github.com/cosmos/ibc-go/tree/wasm-v8.0.0/docs/docs/03-light-clients/04-wasm
 * Goal: determine differences in syntax and behaviour
 
-1. compare tags
+1. Compare tags
 * Notional: https://github.com/notional-labs/ibc-go/tree/wasm-client-centauri
 * Cosmos: https://github.com/cosmos/ibc-go/tree/wasm-v8.0.0
 
+2. Index
+- [Composable wasm client migration](#composable-wasm-client-migration)
+  - [Structure difference](#structure-difference)
+    - [Proxy light client](#proxy-light-client)
+      - [1. ClientState: different in syntax, same in behavior](#1-clientstate-different-in-syntax-same-in-behavior)
+      - [2. ConsensusState](#2-consensusstate)
+      - [3. ClientMessage](#3-clientmessage)
+    - [Messages](#messages)
+      - [1. MsgStoreCode: different in syntax, same in behavior](#1-msgstorecode-different-in-syntax-same-in-behavior)
+      - [2. MsgMigrateContract](#2-msgmigratecontract)
+      - [3. MsgRemoveChecksum](#3-msgremovechecksum)
+    - [Wasm entrypoint messages](#wasm-entrypoint-messages)
+      - [1. InstantiateMessage: complete migration of contract is needed](#1-instantiatemessage-complete-migration-of-contract-is-needed)
+      - [2. QueryMessage: complete migration of contract is needed](#2-querymessage-complete-migration-of-contract-is-needed)
+      - [3. SudoMessage: complete migration of contract is needed](#3-sudomessage-complete-migration-of-contract-is-needed)
+
 ## Structure difference
 
-#### Proxy light client (light client state will be persisted. As such, should try to avoid change structure)
-1. ClientState: different in syntax, same in behavior
+### Proxy light client 
+
+light client state will be persisted. As such, should try to avoid change structure
+
+#### 1. ClientState: different in syntax, same in behavior
 * Notional: use Notional: CodeId in place of Cosmos: CheckSum, deprecate Notional: XInner
 ```go
 type ClientState struct {
@@ -38,12 +57,15 @@ type ClientState struct {
 }
 ```
 
-2. ConsensusState
+#### 2. ConsensusState
 
-3. ClientMessage
+#### 3. ClientMessage
 
-#### Messages (Message will not be persisted in store, as such can change name)
-1. MsgStoreCode: different in syntax, same in behavior
+### Messages 
+
+Message will not be persisted in store, as such can change name
+
+#### 1. MsgStoreCode: different in syntax, same in behavior
 * Notional: change Notional: MsgPushNewWasmCode to Cosmos: MsgStoreCode, change Notional: Code to Cosmos: WasmByteCode
 ```go
 // Message type to push new wasm code
@@ -65,13 +87,15 @@ type MsgStoreCode struct {
 }
 ```
 
-2. MsgMigrateContract
+#### 2. MsgMigrateContract
 
-3. MsgRemoveChecksum
+#### 3. MsgRemoveChecksum
 
-#### Wasm entrypoint messages (Different messages will require deploying new contract. As such, should try to avoid change structure)
+### Wasm entrypoint messages 
 
-1. InstantiateMessage: complete migration of contract is needed
+Different messages will require deploying new contract. As such, should try to avoid change structure
+
+#### 1. InstantiateMessage: complete migration of contract is needed
 
 * Notional: []byte("{}")
 
@@ -86,7 +110,7 @@ type InstantiateMessage struct {
 }
 ```
 
-2. QueryMessage: complete migration of contract is needed
+#### 2. QueryMessage: complete migration of contract is needed
 
 * Notional: lacks TimestampAtHeight, VerifyClientMessage, CheckForMisbehaviour
 ```go
@@ -143,7 +167,7 @@ type CheckForMisbehaviourMsg struct {
 }
 ```
 
-3. SudoMessage: complete migration of contract is needed
+#### 3. SudoMessage: complete migration of contract is needed
 
 * Notional: use execute instead of sudo
 
