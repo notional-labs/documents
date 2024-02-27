@@ -4,14 +4,14 @@
 * Goal: determine differences in syntax and behaviour
 
 1. compare tags
-* A: https://github.com/notional-labs/ibc-go/tree/wasm-client-centauri
-* B: https://github.com/cosmos/ibc-go/tree/wasm-v8.0.0
+* Notional: https://github.com/notional-labs/ibc-go/tree/wasm-client-centauri
+* Cosmos: https://github.com/cosmos/ibc-go/tree/wasm-v8.0.0
 
 ## Structure difference
 
 #### Proxy light client
 1. ClientState: different in syntax, same in behavior
-* A: use A: CodeId in place of B: CheckSum, remove A: XInner
+* Notional: use Notional: CodeId in place of Cosmos: CheckSum, remove Notional: XInner
 ```go
 type ClientState struct {
 	Data         []byte       `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
@@ -21,12 +21,12 @@ type ClientState struct {
 	// Types that are valid to be assigned to XInner:
 	//	*ClientState_Inner
     // XInner is used to hold received bytes data for ClientState, which will be later converted to ClientState
-    // this feature has been incorporated into B:08-wasm/types/wasm.pb.go
+    // this feature has been incorporated into Cosmos:08-wasm/types/wasm.pb.go
 	XInner isClientState_XInner `protobuf_oneof:"_inner" json:",omitempty"`
 }
 ```
 
-* B:
+* Cosmos:
 ```go
 type ClientState struct {
 	// bytes encoding the client state of the underlying light client
@@ -46,7 +46,7 @@ type ClientState struct {
 
 #### Messages
 1. MsgStoreCode
-* a: 
+* Notional: 
 
 
 2. MsgMigrateContract
