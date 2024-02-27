@@ -1,13 +1,15 @@
 # Composable wasm client migration
 
-* Architecture: https://github.com/cosmos/ibc-go/tree/wasm-v8.0.0/docs/docs/03-light-clients/04-wasm
-* Goal: determine differences in syntax and behaviour
+- Architecture: https://github.com/cosmos/ibc-go/tree/wasm-v8.0.0/docs/docs/03-light-clients/04-wasm
+- Goal: determine differences in syntax and behaviour
 
 1. Compare tags
-* Notional: https://github.com/notional-labs/ibc-go/tree/wasm-client-centauri
-* Cosmos: https://github.com/cosmos/ibc-go/tree/wasm-v8.0.0
+
+- Notional: https://github.com/notional-labs/ibc-go/tree/wasm-client-centauri
+- Cosmos: https://github.com/cosmos/ibc-go/tree/wasm-v8.0.0
 
 2. Index
+
 - [Composable wasm client migration](#composable-wasm-client-migration)
   - [Structure difference](#structure-difference)
     - [Proxy light client](#proxy-light-client)
@@ -25,12 +27,14 @@
 
 ## Structure difference
 
-### Proxy light client 
+### Proxy light client
 
 light client state will be persisted. As such, should try to avoid change structure
 
 #### 1. ClientState: different in syntax, same in behavior
-* Notional: use Notional: CodeId in place of Cosmos: CheckSum, deprecate Notional: XInner
+
+- Notional: use Notional: CodeId in place of Cosmos: CheckSum, deprecate Notional: XInner
+
 ```go
 type ClientState struct {
 	Data         []byte       `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
@@ -45,7 +49,8 @@ type ClientState struct {
 }
 ```
 
-* Cosmos:
+- Cosmos:
+
 ```go
 type ClientState struct {
 	// bytes encoding the client state of the underlying light client
@@ -59,14 +64,42 @@ type ClientState struct {
 
 #### 2. ConsensusState
 
+\*Notional: deprecate: xInner
+
+```go
+
+type ConsensusState struct {
+	Data []byte `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
+	// timestamp that corresponds to the block height in which the ConsensusState
+	// was stored.
+	Timestamp uint64 `protobuf:"varint,2,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	// Types that are valid to be assigned to XInner:
+	//	*ConsensusState_Inner
+	XInner isConsensusState_XInner `protobuf_oneof:"_inner" json:",omitempty"`
+}
+```
+
+\*Cosmos:
+
+```go
+
+type ConsensusState struct {
+	// bytes encoding the consensus state of the underlying light client
+	// implemented as a Wasm contract.
+	Data []byte `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
+}
+```
+
 #### 3. ClientMessage
 
-### Messages 
+### Messages
 
 Message will not be persisted in store, as such can change name
 
 #### 1. MsgStoreCode: different in syntax, same in behavior
-* Notional: change Notional: MsgPushNewWasmCode to Cosmos: MsgStoreCode, change Notional: Code to Cosmos: WasmByteCode
+
+- Notional: change Notional: MsgPushNewWasmCode to Cosmos: MsgStoreCode, change Notional: Code to Cosmos: WasmByteCode
+
 ```go
 // Message type to push new wasm code
 type MsgPushNewWasmCode struct {
@@ -76,7 +109,8 @@ type MsgPushNewWasmCode struct {
 }
 ```
 
-* Cosmos:
+- Cosmos:
+
 ```go
 // MsgStoreCode defines the request type for the StoreCode rpc.
 type MsgStoreCode struct {
@@ -91,15 +125,15 @@ type MsgStoreCode struct {
 
 #### 3. MsgRemoveChecksum
 
-### Wasm entrypoint messages 
+### Wasm entrypoint messages
 
 Different messages will require deploying new contract. As such, should try to avoid change structure
 
 #### 1. InstantiateMessage: complete migration of contract is needed
 
-* Notional: []byte("{}")
+- Notional: []byte("{}")
 
-* Cosmos:
+- Cosmos:
 
 ```go
 // InstantiateMessage is the message that is sent to the contract's instantiate entry point.
@@ -112,7 +146,8 @@ type InstantiateMessage struct {
 
 #### 2. QueryMessage: complete migration of contract is needed
 
-* Notional: lacks TimestampAtHeight, VerifyClientMessage, CheckForMisbehaviour
+- Notional: lacks TimestampAtHeight, VerifyClientMessage, CheckForMisbehaviour
+
 ```go
 var (
 statusPayloadInner struct{}
@@ -130,7 +165,7 @@ type ExportMetadataPayload struct {
 type ExportMetadataInnerPayload struct{}
 ```
 
-* Cosmos:
+- Cosmos:
 
 ```go
 // QueryMsg is used to encode messages that are sent to the contract's query entry point.
@@ -169,7 +204,7 @@ type CheckForMisbehaviourMsg struct {
 
 #### 3. SudoMessage: complete migration of contract is needed
 
-* Notional: use execute instead of sudo
+- Notional: use execute instead of sudo
 
 ```go
 type (
@@ -269,7 +304,8 @@ type verifyUpgradeAndUpdateStateMsgPayload struct {
 }
 ```
 
-* Cosmos:
+- Cosmos:
+
 ```go
 // SudoMsg is used to encode messages that are sent to the contract's sudo entry point.
 // The json omitempty tag is mandatory since it omits any empty (default initialized) fields from the encoded JSON,
