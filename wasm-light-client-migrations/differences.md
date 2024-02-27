@@ -69,3 +69,234 @@ type MsgStoreCode struct {
 
 3. MsgRemoveChecksum
 
+#### Wasm entrypoint messages (Different messages will require deploying new contract. As such, should try to avoid change structure)
+
+1. InstantiateMessage: complete migration of contract is needed
+
+* Notional: []byte("{}")
+
+* Cosmos:
+
+```go
+// InstantiateMessage is the message that is sent to the contract's instantiate entry point.
+type InstantiateMessage struct {
+	ClientState    []byte `json:"client_state"`
+	ConsensusState []byte `json:"consensus_state"`
+	Checksum       []byte `json:"checksum"`
+}
+```
+
+2. QueryMessage: complete migration of contract is needed
+
+* Notional: lacks TimestampAtHeight, VerifyClientMessage, CheckForMisbehaviour
+```go
+var (
+statusPayloadInner struct{}
+statusPayload      struct {
+    Status statusPayloadInner `json:"status"`
+}
+)
+```
+
+```go
+type ExportMetadataPayload struct {
+	ExportMetadata ExportMetadataInnerPayload `json:"export_metadata"`
+}
+
+type ExportMetadataInnerPayload struct{}
+```
+
+* Cosmos:
+
+```go
+// QueryMsg is used to encode messages that are sent to the contract's query entry point.
+// The json omitempty tag is mandatory since it omits any empty (default initialized) fields from the encoded JSON,
+// this is required in order to be compatible with Rust's enum matching as used in the contract.
+// Only one field should be set at a time.
+type QueryMsg struct {
+	Status               *StatusMsg               `json:"status,omitempty"`
+	ExportMetadata       *ExportMetadataMsg       `json:"export_metadata,omitempty"`
+	TimestampAtHeight    *TimestampAtHeightMsg    `json:"timestamp_at_height,omitempty"`
+	VerifyClientMessage  *VerifyClientMessageMsg  `json:"verify_client_message,omitempty"`
+	CheckForMisbehaviour *CheckForMisbehaviourMsg `json:"check_for_misbehaviour,omitempty"`
+}
+
+// StatusMsg is a queryMsg sent to the contract to query the status of the wasm client.
+type StatusMsg struct{}
+
+// ExportMetadataMsg is a queryMsg sent to the contract to query the exported metadata of the wasm client.
+type ExportMetadataMsg struct{}
+
+// TimestampAtHeightMsg is a queryMsg sent to the contract to query the timestamp at a given height.
+type TimestampAtHeightMsg struct {
+	Height clienttypes.Height `json:"height"`
+}
+
+// VerifyClientMessageMsg is a queryMsg sent to the contract to verify a client message.
+type VerifyClientMessageMsg struct {
+	ClientMessage []byte `json:"client_message"`
+}
+
+// CheckForMisbehaviourMsg is a queryMsg sent to the contract to check for misbehaviour.
+type CheckForMisbehaviourMsg struct {
+	ClientMessage []byte `json:"client_message"`
+}
+```
+
+3. SudoMessage: complete migration of contract is needed
+
+* Notional: use execute instead of sudo
+
+```go
+type (
+	verifyMembershipPayloadInner struct {
+		Height           exported.Height `json:"height"`
+		DelayTimePeriod  uint64          `json:"delay_time_period"`
+		DelayBlockPeriod uint64          `json:"delay_block_period"`
+		Proof            []byte          `json:"proof"`
+		Path             exported.Path   `json:"path"`
+		Value            []byte          `json:"value"`
+	}
+	verifyMembershipPayload struct {
+		VerifyMembershipPayloadInner verifyMembershipPayloadInner `json:"verify_membership"`
+	}
+)
+```
+
+```go
+type (
+	verifyNonMembershipPayloadInner struct {
+		Height           exported.Height `json:"height"`
+		DelayTimePeriod  uint64          `json:"delay_time_period"`
+		DelayBlockPeriod uint64          `json:"delay_block_period"`
+		Proof            []byte          `json:"proof"`
+		Path             exported.Path   `json:"path"`
+	}
+	verifyNonMembershipPayload struct {
+		VerifyNonMembershipPayloadInner verifyNonMembershipPayloadInner `json:"verify_non_membership"`
+	}
+)
+```
+
+```go
+type checkForMisbehaviourPayload struct {
+	CheckForMisbehaviour checkForMisbehaviourInnerPayload `json:"check_for_misbehaviour"`
+}
+type checkForMisbehaviourInnerPayload struct {
+	ClientMessage clientMessageConcretePayloadClientMessage `json:"client_message"`
+}
+```
+
+```go
+type checkSubstituteAndUpdateStatePayload struct {
+	CheckSubstituteAndUpdateState CheckSubstituteAndUpdateStatePayload `json:"check_substitute_and_update_state"`
+}
+
+type CheckSubstituteAndUpdateStatePayload struct{}
+```
+
+```go
+type verifyClientMessagePayload struct {
+	VerifyClientMessage verifyClientMessageInnerPayload `json:"verify_client_message"`
+}
+
+type clientMessageConcretePayloadClientMessage struct {
+	Header       *Header       `json:"header,omitempty"`
+	Misbehaviour *Misbehaviour `json:"misbehaviour,omitempty"`
+}
+type verifyClientMessageInnerPayload struct {
+	ClientMessage clientMessageConcretePayloadClientMessage `json:"client_message"`
+}
+```
+
+```go
+type updateStatePayload struct {
+	UpdateState updateStateInnerPayload `json:"update_state"`
+}
+type updateStateInnerPayload struct {
+	ClientMessage clientMessageConcretePayload `json:"client_message"`
+}
+
+type clientMessageConcretePayload struct {
+	Header       *Header       `json:"header,omitempty"`
+	Misbehaviour *Misbehaviour `json:"misbehaviour,omitempty"`
+}
+```
+
+```go
+type updateStateOnMisbehaviourPayload struct {
+	UpdateStateOnMisbehaviour updateStateOnMisbehaviourInnerPayload `json:"update_state_on_misbehaviour"`
+}
+type updateStateOnMisbehaviourInnerPayload struct {
+	ClientMessage clientMessageConcretePayloadClientMessage `json:"client_message"`
+}
+```
+
+```go
+type verifyUpgradeAndUpdateStatePayload struct {
+	VerifyUpgradeAndUpdateStateMsg verifyUpgradeAndUpdateStateMsgPayload `json:"verify_upgrade_and_update_state"`
+}
+
+type verifyUpgradeAndUpdateStateMsgPayload struct {
+	UpgradeClientState         exported.ClientState    `json:"upgrade_client_state"`
+	UpgradeConsensusState      exported.ConsensusState `json:"upgrade_consensus_state"`
+	ProofUpgradeClient         []byte                  `json:"proof_upgrade_client"`
+	ProofUpgradeConsensusState []byte                  `json:"proof_upgrade_consensus_state"`
+}
+```
+
+* Cosmos:
+```go
+// SudoMsg is used to encode messages that are sent to the contract's sudo entry point.
+// The json omitempty tag is mandatory since it omits any empty (default initialized) fields from the encoded JSON,
+// this is required in order to be compatible with Rust's enum matching as used in the contract.
+// Only one field should be set at a time.
+type SudoMsg struct {
+	UpdateState                 *UpdateStateMsg                 `json:"update_state,omitempty"`
+	UpdateStateOnMisbehaviour   *UpdateStateOnMisbehaviourMsg   `json:"update_state_on_misbehaviour,omitempty"`
+	VerifyUpgradeAndUpdateState *VerifyUpgradeAndUpdateStateMsg `json:"verify_upgrade_and_update_state,omitempty"`
+	VerifyMembership            *VerifyMembershipMsg            `json:"verify_membership,omitempty"`
+	VerifyNonMembership         *VerifyNonMembershipMsg         `json:"verify_non_membership,omitempty"`
+	MigrateClientStore          *MigrateClientStoreMsg          `json:"migrate_client_store,omitempty"`
+}
+
+// UpdateStateMsg is a sudoMsg sent to the contract to update the client state.
+type UpdateStateMsg struct {
+	ClientMessage []byte `json:"client_message"`
+}
+
+// UpdateStateOnMisbehaviourMsg is a sudoMsg sent to the contract to update its state on misbehaviour.
+type UpdateStateOnMisbehaviourMsg struct {
+	ClientMessage []byte `json:"client_message"`
+}
+
+// VerifyMembershipMsg is a sudoMsg sent to the contract to verify a membership proof.
+type VerifyMembershipMsg struct {
+	Height           clienttypes.Height         `json:"height"`
+	DelayTimePeriod  uint64                     `json:"delay_time_period"`
+	DelayBlockPeriod uint64                     `json:"delay_block_period"`
+	Proof            []byte                     `json:"proof"`
+	Path             commitmenttypes.MerklePath `json:"path"`
+	Value            []byte                     `json:"value"`
+}
+
+// VerifyNonMembershipMsg is a sudoMsg sent to the contract to verify a non-membership proof.
+type VerifyNonMembershipMsg struct {
+	Height           clienttypes.Height         `json:"height"`
+	DelayTimePeriod  uint64                     `json:"delay_time_period"`
+	DelayBlockPeriod uint64                     `json:"delay_block_period"`
+	Proof            []byte                     `json:"proof"`
+	Path             commitmenttypes.MerklePath `json:"path"`
+}
+
+// VerifyUpgradeAndUpdateStateMsg is a sudoMsg sent to the contract to verify an upgrade and update its state.
+type VerifyUpgradeAndUpdateStateMsg struct {
+	UpgradeClientState         []byte `json:"upgrade_client_state"`
+	UpgradeConsensusState      []byte `json:"upgrade_consensus_state"`
+	ProofUpgradeClient         []byte `json:"proof_upgrade_client"`
+	ProofUpgradeConsensusState []byte `json:"proof_upgrade_consensus_state"`
+}
+
+// MigrateClientStore is a sudoMsg sent to the contract to verify a given substitute client and update to its state.
+type MigrateClientStoreMsg struct{}
+```
