@@ -9,9 +9,9 @@
 
 ## Structure difference
 
-#### Proxy light client
+#### Proxy light client (light client state will be persisted. As such, should try to avoid change structure)
 1. ClientState: different in syntax, same in behavior
-* Notional: use Notional: CodeId in place of Cosmos: CheckSum, remove Notional: XInner
+* Notional: use Notional: CodeId in place of Cosmos: CheckSum, deprecate Notional: XInner
 ```go
 type ClientState struct {
 	Data         []byte       `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
@@ -38,18 +38,34 @@ type ClientState struct {
 }
 ```
 
-1. ConsensusState
+2. ConsensusState
 
+3. ClientMessage
 
+#### Messages (Message will not be persisted in store, as such can change name)
+1. MsgStoreCode: different in syntax, same in behavior
+* Notional: change Notional: MsgPushNewWasmCode to Cosmos: MsgStoreCode, change Notional: Code to Cosmos: WasmByteCode
+```go
+// Message type to push new wasm code
+type MsgPushNewWasmCode struct {
+	Signer string `protobuf:"bytes,1,opt,name=signer,proto3" json:"signer,omitempty"`
+    // Code stores wasm byte code
+	Code   []byte `protobuf:"bytes,2,opt,name=code,proto3" json:"code,omitempty"`
+}
+```
 
-1. ClientMessage
-
-#### Messages
-1. MsgStoreCode
-* Notional: 
-
+* Cosmos:
+```go
+// MsgStoreCode defines the request type for the StoreCode rpc.
+type MsgStoreCode struct {
+	// signer address
+	Signer string `protobuf:"bytes,1,opt,name=signer,proto3" json:"signer,omitempty"`
+	// wasm byte code of light client contract. It can be raw or gzip compressed
+	WasmByteCode []byte `protobuf:"bytes,2,opt,name=wasm_byte_code,json=wasmByteCode,proto3" json:"wasm_byte_code,omitempty"`
+}
+```
 
 2. MsgMigrateContract
 
-3. MsgRemoveCodeHash
+3. MsgRemoveChecksum
 
