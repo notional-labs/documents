@@ -11,23 +11,24 @@
 2. Index
 
 - [Composable wasm client migration](#composable-wasm-client-migration)
-  - [Structure difference](#structure-difference)
-    - [Proxy light client](#proxy-light-client)
-      - [1. ClientState: different in syntax, same in behavior](#1-clientstate-different-in-syntax-same-in-behavior)
-      - [2. ConsensusState](#2-consensusstate)
-      - [3. ClientMessage](#3-clientmessage)
-    - [Messages](#messages)
-      - [1. MsgStoreCode: different in syntax, same in behavior](#1-msgstorecode-different-in-syntax-same-in-behavior)
-      - [2. MsgMigrateContract](#2-msgmigratecontract)
-      - [3. MsgRemoveChecksum](#3-msgremovechecksum)
-    - [Wasm entrypoint messages](#wasm-entrypoint-messages)
-      - [1. InstantiateMessage: complete migration of contract is needed](#1-instantiatemessage-complete-migration-of-contract-is-needed)
-      - [2. QueryMessage: complete migration of contract is needed](#2-querymessage-complete-migration-of-contract-is-needed)
-      - [3. SudoMessage: complete migration of contract is needed](#3-sudomessage-complete-migration-of-contract-is-needed)
+	- [Structure difference](#structure-difference)
+		- [Proxy light client state](#proxy-light-client-state)
+			- [1. ClientState: different in syntax, same in behavior](#1-clientstate-different-in-syntax-same-in-behavior)
+			- [2. ConsensusState](#2-consensusstate)
+		- [Proxy light client message](#proxy-light-client-message)
+			- [1. ClientMessage](#1-clientmessage)
+		- [Messages](#messages)
+			- [1. MsgStoreCode: different in syntax, same in behavior](#1-msgstorecode-different-in-syntax-same-in-behavior)
+			- [2. MsgMigrateContract](#2-msgmigratecontract)
+			- [3. MsgRemoveChecksum](#3-msgremovechecksum)
+		- [Wasm entrypoint messages](#wasm-entrypoint-messages)
+			- [1. InstantiateMessage: migration of contract is needed](#1-instantiatemessage-migration-of-contract-is-needed)
+			- [2. QueryMessage: migration of contract is needed](#2-querymessage-migration-of-contract-is-needed)
+			- [3. SudoMessage: migration of contract is needed](#3-sudomessage-migration-of-contract-is-needed)
 
 ## Structure difference
 
-### Proxy light client
+### Proxy light client state
 
 light client state will be persisted. As such, should try to avoid change structure
 
@@ -64,33 +65,36 @@ type ClientState struct {
 
 #### 2. ConsensusState
 
-\*Notional: deprecate: xInner
+### Proxy light client message
 
+Message will not be persisted in store, as such can change name
+
+#### 1. ClientMessage
+* Notional: change the handling of Notional: Header, Notional: Misbehaviour to Cosmos: ClientMessage
 ```go
-
-type ConsensusState struct {
-	Data []byte `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
-	// timestamp that corresponds to the block height in which the ConsensusState
-	// was stored.
-	Timestamp uint64 `protobuf:"varint,2,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+type Header struct {
+	Data   []byte       `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
+	Height types.Height `protobuf:"bytes,2,opt,name=height,proto3" json:"height" yaml:"height"`
 	// Types that are valid to be assigned to XInner:
-	//	*ConsensusState_Inner
-	XInner isConsensusState_XInner `protobuf_oneof:"_inner" json:",omitempty"`
+	//	*Header_Inner
+	XInner isHeader_XInner `protobuf_oneof:"_inner" json:",omitempty"`
 }
 ```
 
-\*Cosmos:
-
 ```go
-
-type ConsensusState struct {
-	// bytes encoding the consensus state of the underlying light client
-	// implemented as a Wasm contract.
+// Wasm light client Misbehaviour
+type Misbehaviour struct {
 	Data []byte `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
 }
 ```
 
-#### 3. ClientMessage
+* Cosmos:
+```go
+// Wasm light client message (either header(s) or misbehaviour)
+type ClientMessage struct {
+	Data []byte `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
+}
+```
 
 ### Messages
 
@@ -129,7 +133,7 @@ type MsgStoreCode struct {
 
 Different messages will require deploying new contract. As such, should try to avoid change structure
 
-#### 1. InstantiateMessage: complete migration of contract is needed
+#### 1. InstantiateMessage: migration of contract is needed
 
 - Notional: []byte("{}")
 
@@ -144,7 +148,7 @@ type InstantiateMessage struct {
 }
 ```
 
-#### 2. QueryMessage: complete migration of contract is needed
+#### 2. QueryMessage: migration of contract is needed
 
 - Notional: lacks TimestampAtHeight, VerifyClientMessage, CheckForMisbehaviour
 
@@ -202,7 +206,7 @@ type CheckForMisbehaviourMsg struct {
 }
 ```
 
-#### 3. SudoMessage: complete migration of contract is needed
+#### 3. SudoMessage: migration of contract is needed
 
 - Notional: use execute instead of sudo
 
