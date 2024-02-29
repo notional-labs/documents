@@ -1,4 +1,4 @@
-# Assetment
+# Assessment
 
 The `wasm-client` module `is not being affected` by the migration process.
 
