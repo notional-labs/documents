@@ -11,20 +11,20 @@
 2. Index
 
 - [Composable wasm client migration](#composable-wasm-client-migration)
-	- [Structure difference](#structure-difference)
-		- [Proxy light client state](#proxy-light-client-state)
-			- [1. ClientState: different in syntax, same in behavior](#1-clientstate-different-in-syntax-same-in-behavior)
-			- [2. ConsensusState](#2-consensusstate)
-		- [Proxy light client message](#proxy-light-client-message)
-			- [1. ClientMessage](#1-clientmessage)
-		- [Messages](#messages)
-			- [1. MsgStoreCode: different in syntax, same in behavior](#1-msgstorecode-different-in-syntax-same-in-behavior)
-			- [2. MsgMigrateContract](#2-msgmigratecontract)
-			- [3. MsgRemoveChecksum](#3-msgremovechecksum)
-		- [Wasm entrypoint messages](#wasm-entrypoint-messages)
-			- [1. InstantiateMessage: migration of contract is needed](#1-instantiatemessage-migration-of-contract-is-needed)
-			- [2. QueryMessage: migration of contract is needed](#2-querymessage-migration-of-contract-is-needed)
-			- [3. SudoMessage: migration of contract is needed](#3-sudomessage-migration-of-contract-is-needed)
+  - [Structure difference](#structure-difference)
+    - [Proxy light client state](#proxy-light-client-state)
+      - [1. ClientState: different in syntax, same in behavior](#1-clientstate-different-in-syntax-same-in-behavior)
+      - [2. ConsensusState](#2-consensusstate)
+    - [Proxy light client message](#proxy-light-client-message)
+      - [1. ClientMessage](#1-clientmessage)
+    - [Messages](#messages)
+      - [1. MsgStoreCode: different in syntax, same in behavior](#1-msgstorecode-different-in-syntax-same-in-behavior)
+      - [2. MsgMigrateContract](#2-msgmigratecontract)
+      - [3. MsgRemoveChecksum](#3-msgremovechecksum)
+    - [Wasm entrypoint messages](#wasm-entrypoint-messages)
+      - [1. InstantiateMessage: migration of contract is needed](#1-instantiatemessage-migration-of-contract-is-needed)
+      - [2. QueryMessage: migration of contract is needed](#2-querymessage-migration-of-contract-is-needed)
+      - [3. SudoMessage: migration of contract is needed](#3-sudomessage-migration-of-contract-is-needed)
 
 ## Structure difference
 
@@ -65,12 +65,41 @@ type ClientState struct {
 
 #### 2. ConsensusState
 
+Comsos consensus state types remove `Timetamp` and `XInner` fields
+
+- Notional:
+
+```go
+
+type ConsensusState struct {
+	Data []byte `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
+	// timestamp that corresponds to the block height in which the ConsensusState
+	// was stored.
+	Timestamp uint64 `protobuf:"varint,2,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	// Types that are valid to be assigned to XInner:
+	//	*ConsensusState_Inner
+	XInner isConsensusState_XInner `protobuf_oneof:"_inner" json:",omitempty"`
+}
+```
+
+- Cosmos:
+
+```go
+type ConsensusState struct {
+	// bytes encoding the consensus state of the underlying light client
+	// implemented as a Wasm contract.
+	Data []byte `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
+}
+```
+
 ### Proxy light client message
 
 Message will not be persisted in store, as such can change name
 
 #### 1. ClientMessage
-* Notional: change the handling of Notional: Header, Notional: Misbehaviour to Cosmos: ClientMessage
+
+- Notional: change the handling of Notional: Header, Notional: Misbehaviour to Cosmos: ClientMessage
+
 ```go
 type Header struct {
 	Data   []byte       `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
@@ -88,7 +117,8 @@ type Misbehaviour struct {
 }
 ```
 
-* Cosmos:
+- Cosmos:
+
 ```go
 // Wasm light client message (either header(s) or misbehaviour)
 type ClientMessage struct {
@@ -127,7 +157,22 @@ type MsgStoreCode struct {
 
 #### 2. MsgMigrateContract
 
+- Notional
+
+```go
+func (k Keeper) UpdateWasmCodeId(goCtx context.Context, msg *types.MsgUpdateWasmCodeId) (*types.MsgUpdateWasmCodeIdResponse, error)
+```
+
+- Cosmos
+
+```go
+func (k Keeper) migrateContractCode(ctx sdk.Context, clientID string, newChecksum, migrateMsg []byte) error {
+
+```
+
 #### 3. MsgRemoveChecksum
+
+- Notional does not have MsgRemoveChecksum
 
 ### Wasm entrypoint messages
 
