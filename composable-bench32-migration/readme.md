@@ -10,14 +10,12 @@ This is the documentation for the migration process of the `bench32` prefix, fro
 ## Module affected
 - Auth [Link Text](./auth/assessment.md)
 - Gov [Link Text](./gov/assessment.md)
-- IBC-Hooks [Link Text](./ibc-hooks/assessment.md)
 - Interchain-account host [Link Text](./icahost/assessment.md)
 - Mint [Link Text](./mint/assessment.md)
-- ~~Ratelimit [Link Text](./ratelimit/assessment.md)~~
 - Slashing [Link Text](./slashing/assessment.md)
 - Staking [Link Text](./staking/assessment.md)
 - Transfermiddleware [Link Text](./transfermiddleware/assessment.md)
-- Wasm contracts [Link Text](./wasm-contracts/assessment.md)
+- Wasmd [Link Text](./wasm-contracts/assessment.md)
 
 ## Module not affected
 - Alliance [Link Text](./alliance/assessment.md)
@@ -35,3 +33,5 @@ This is the documentation for the migration process of the `bench32` prefix, fro
 - Params [Link Text](./params/assessment.md)
 - Stakingmiddleware [Link Text](./stakingmiddleware/assessment.md)
 - Upgrade [Link Text](./upgrade/assessment.md)
+- IBC-Hooks [Link Text](./ibc-hooks/assessment.md)
+- Ratelimit [Link Text](./ratelimit/assessment.md)
