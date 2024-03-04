@@ -1,6 +1,6 @@
 # Assessment
 
-The `ratelimit` module `is being affected` by the migration process.
+The `ratelimit` module `is not being affected` by the migration process.
 
 ## SetWhitelistedAddressPair
 This function takes WhitelistedAddressPair as a parameter. It has Sender and Receiver as bech32 addresses. 
@@ -20,4 +20,4 @@ type WhitelistedAddressPair struct {
 }
 ```
 
-So the solution here is get all the data from GetAddressWhitelistKey, change the Sender and Receiver into new prefix. And we also need to change its components into new prefix.
+This function is triggered in InitGenesis function. But in genesis file, WhitelistedAddressPair is empty so the migration does not affect this module.

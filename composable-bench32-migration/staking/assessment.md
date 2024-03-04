@@ -210,7 +210,7 @@ func (k Keeper) SetUnbondingDelegationByUnbondingID(ctx sdk.Context, ubd types.U
 	k.SetUnbondingType(ctx, id, types.UnbondingType_UnbondingDelegation)
 }
 ```
-This function takes types.UnbondingDelegation as its argument, which have DelegatorAddress, ValidatorAddress as bech32 addresses
+This function takes types.UnbondingDelegation as its argument, which have DelegatorAddress, ValidatorAddress. But they then are converted into accAddress and valAddress so this function is not affected by the migration.
 ```go
 // UnbondingDelegation stores all of a single delegator's unbonding bonds
 // for a single validator in an time-ordered list.
@@ -252,7 +252,7 @@ func (k Keeper) SetRedelegationByUnbondingID(ctx sdk.Context, red types.Redelega
 	k.SetUnbondingType(ctx, id, types.UnbondingType_Redelegation)
 }
 ```
-This function takes types.Redelegation as its argument, which have DelegatorAddress, ValidatorSrcAddress and ValidatorDstAddress as bech32 addresses
+This function takes types.Redelegation as its argument, which have DelegatorAddress, ValidatorSrcAddress and ValidatorDstAddress. They then are converted into accAddress and valAddress so this function is not affected by the migration.
 ```go
 // Redelegation contains the list of a particular delegator's redelegating bonds
 // from a particular source validator to a particular destination validator.
@@ -289,7 +289,7 @@ func (k Keeper) SetValidatorByUnbondingID(ctx sdk.Context, val types.Validator, 
 	k.SetUnbondingType(ctx, id, types.UnbondingType_ValidatorUnbonding)
 }
 ```
-This function takes types.Validator as its argument, which have OperatorAddress as bech32 address
+This function takes types.Validator as its argument, which have OperatorAddress. And it is converted into accAddress and valAddress so this function is not affected by the migration.
 ```go
 // Validator defines a validator, together with the total amount of the
 // Validator's bond shares and their exchange rate to coins. Slashing results in
