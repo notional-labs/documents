@@ -39,6 +39,7 @@ This is the documentation for the migration process of the `bench32` prefix, fro
 
 ## List of actionable items
 1) Keplr
+
     a) Keplr-chain-registry 
     - [Update bench32 config in keplr](https://github.com/chainapsis/keplr-chain-registry/blob/main/cosmos/centauri.json#L22)
     - Update chainName -> Picasso
