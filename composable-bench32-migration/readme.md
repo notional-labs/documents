@@ -38,6 +38,8 @@ This is the documentation for the migration process of the `bench32` prefix, fro
 
 
 ## List of actionable items
+### Before chain upgrade
+Need PR before chain upgrade, merge after chain upgrade
 1) Keplr
 
     a) Keplr-chain-registry 
@@ -57,6 +59,9 @@ This is the documentation for the migration process of the `bench32` prefix, fro
 3) Ping.pub
     - [Move file to pica.json ](https://github.com/ping-pub/ping.pub/blob/main/chains/mainnet/centauri.json)
     - Update chain_name and addr_prefix
+
+### After chain upgrade
+Merge keplr fist, and config relayer 
 
 4) Relayer
     - Update config account-prefix to pica
