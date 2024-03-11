@@ -51,7 +51,7 @@ Need PR before chain upgrade, merge after chain upgrade
     - [Update appName from Composable -> Picasso ](https://github.com/chainapsis/keplr-app-registry/blob/main/apps/composable/app.json)
     - Update folder composable -> picasso
 
-2) Cosmos chain-registry
+2) [Cosmos chain-registry] (https://github.com/cosmos/chain-registry/tree/master/composable)
     - Update folder composable -> picasso
     - Update chain_name in assetlist.json
     - Update info (name, bench32 prefix, ...) in chain.json
