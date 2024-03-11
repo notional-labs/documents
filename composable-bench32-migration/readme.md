@@ -35,3 +35,27 @@ This is the documentation for the migration process of the `bench32` prefix, fro
 - Upgrade [Link Text](./upgrade/assessment.md)
 - IBC-Hooks [Link Text](./ibc-hooks/assessment.md) @dzmitry-lahoda +1
 - Ratelimit [Link Text](./ratelimit/assessment.md) @dzmitry-lahoda +1
+
+
+## List of actionable items
+1) Keplr
+    a) Keplr-chain-registry 
+    - [Update bench32 config in keplr](https://github.com/chainapsis/keplr-chain-registry/blob/main/cosmos/centauri.json#L22)
+    - Update chainName -> Picasso
+    - Move file centauri.json -> pica.json
+    
+    b) Keplr-app-registry
+    - [Update appName from Composable -> Picasso ](https://github.com/chainapsis/keplr-app-registry/blob/main/apps/composable/app.json)
+    - Update folder composable -> picasso
+
+2) Cosmos chain-registry
+    - Update folder composable -> picasso
+    - Update chain_name in assetlist.json
+    - Update info (name, bench32 prefix, ...) in chain.json
+
+3) Ping.pub
+    - [Move file to pica.json ](https://github.com/ping-pub/ping.pub/blob/main/chains/mainnet/centauri.json)
+    - Update chain_name and addr_prefix
+
+4) Relayer
+    - Update config account-prefix to pica
