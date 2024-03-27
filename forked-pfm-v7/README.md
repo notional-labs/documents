@@ -6,7 +6,7 @@ This document specifies the different between forked pfm v7 and pfm v8
 ### NewKeeper
 - Add paramSpace paramtypes.Subspace
 - Add transferMiddlewareKeeper types.TransferMiddlewareKeeper,
-- Remove authority
+- Not yet have authority
 - Check if paramSpace has key table
 
 ### WriteAcknowledgementForForwardedPacket
