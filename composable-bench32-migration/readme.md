@@ -65,3 +65,6 @@ Merge keplr fist, and config relayer
 
 4) Relayer
     - Update config account-prefix to pica
+
+5) Hyperspace
+    - Update config account_prefix to pica
